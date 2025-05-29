@@ -1,0 +1,41 @@
+# === КАТАЛОГИ ===
+/build/
+/.vscode/
+/.git/
+
+# === СБОРКА ===
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+compile_commands.json
+
+# === ИСПОЛНЯЕМЫЕ ФАЙЛЫ И БИНАРИИ ===
+*.exe
+*.out
+*.obj
+*.o
+*.a
+*.so
+*.dll
+*.lib
+*.pch
+
+# === ЛОГИ, РЕЗУЛЬТАТЫ, КЭШ ===
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# === ДАННЫЕ ===
+*.yuv
+*.bmp
+
+# === КОНФИГУРАЦИЯ IDE ===
+*.code-workspace
+
+# === ОСОБЕННОСТИ WINDOWS ===
+Thumbs.db
+Desktop.ini
+
