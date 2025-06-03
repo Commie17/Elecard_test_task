@@ -3,33 +3,37 @@
 using namespace std;
 
 
-void OverlayProcessor::overlayImageOnVideo(const string& imagePath, const string& videoPath)
+void OverlayProcessor::overlayImageOnVideo(const std::string& imagePath, const std::string& videoPath, size_t width, size_t height)
 {
-    ImageBmp* imageBmp = new ImageBmp();
-    imageBmp->setNewImageFromFile(imagePath);
+    ImageBmp imageBmp;
+    imageBmp.setNewImageFromFile(imagePath);
 
-    MatrixYUV420 imageYuv = Converter::convertRGB24ToYUV420(imageBmp->getPixelsMatrix());
+    MatrixYUV420 imageYuv = Converter::convertRGB24ToYUV420(imageBmp.getPixelsMatrix());
 
     //ниже производим создание пустого файла подходящего размера для записи результата
     string resultFileName = "overlay " + videoPath;
     size_t sizeOfInputFile = get_video_file_size(videoPath);
 
-    ofstream resultFile(resultFileName, ios::binary | ios::trunc);
-    if (!resultFile.is_open())
-        throw runtime_error("Cannot create output file");
+    if (sizeOfInputFile == 0)
+        throw runtime_error("Cannot open input file");
+    {
+        ofstream resultFile(resultFileName, ios::binary | ios::trunc);
+        if (!resultFile.is_open())
+            throw runtime_error("Cannot create output file");
 
-    resultFile.seekp(sizeOfInputFile - 1);  // Переходим к последнему байту
-    char zero = 0;
-    resultFile.write(&zero, 1); // Записываем 1 пустой байт
-    resultFile.close();
+    
+        resultFile.seekp(sizeOfInputFile - 1);  // Переходим к последнему байту
+        char zero = 0;
+        resultFile.write(&zero, 1); // Записываем 1 пустой байт
+    }
 
-    Yuv420File videoForOverlay = Yuv420File(videoPath, 1920, 1080);
-    Yuv420File videoWithResult = Yuv420File(resultFileName, 1920, 1080);
+    Yuv420File videoForOverlay = Yuv420File(videoPath, width, height);
+    Yuv420File videoWithResult = Yuv420File(resultFileName, width, height);
 
     size_t numOfThreads = thread::hardware_concurrency();
     size_t frameQuantity = sizeOfInputFile / videoForOverlay.frameSize;
+    
     vector<thread> threads;
-
     for (size_t i = 0; i < numOfThreads; ++i)
     {
         size_t startIndex = i * frameQuantity / numOfThreads;
@@ -38,15 +42,13 @@ void OverlayProcessor::overlayImageOnVideo(const string& imagePath, const string
         if (i == numOfThreads - 1)
             endIndex = frameQuantity;
         
-        threads.push_back(thread(OverlayProcessor::overlay_in_thread, cref(imageYuv), cref(videoForOverlay), cref(videoWithResult), startIndex, endIndex));
+        threads.push_back(thread(overlay_in_thread, imageYuv, cref(videoForOverlay), cref(videoWithResult), startIndex, endIndex));
     }
 
     for (auto& it : threads)
     {
         it.join();
     }
-    
-    delete imageBmp;
 }
 
 
@@ -64,8 +66,8 @@ size_t OverlayProcessor::get_video_file_size(const std::string& videoPath)
 
 void OverlayProcessor::overlay_in_thread(MatrixYUV420 imageYuv, const Yuv420File& rawVideo, const Yuv420File& resultVideo, size_t startFrameIndex, size_t endFrameIndex)
 {
-    VideoYuv420Reader* reader = new VideoYuv420Reader();
-    VideoYuv420Writer* writer = new VideoYuv420Writer();
+    unique_ptr<VideoYuv420Reader> reader (new VideoYuv420Reader());
+    unique_ptr<VideoYuv420Writer> writer (new VideoYuv420Writer());
 
     reader->setNewVideoFile(rawVideo);
     reader->setPointerToFrameNumber(startFrameIndex);
@@ -82,7 +84,4 @@ void OverlayProcessor::overlay_in_thread(MatrixYUV420 imageYuv, const Yuv420File
         writer->writeFrame(frame);
         ++currentFrameIndex;
     }
-
-    delete reader;
-    delete writer;
 }

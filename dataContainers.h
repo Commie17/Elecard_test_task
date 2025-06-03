@@ -106,7 +106,7 @@ struct Yuv420File
     size_t height = 0;       
     size_t frameSize = 0;
     
-    Yuv420File(const std::string& filePath, int width, int height)
+    Yuv420File(const std::string& filePath, size_t width, size_t height)
         : path(filePath), width(width), height(height)
     {
         frameSize = width * height + 2 * (width / 2) * (height / 2); // Y + U + V

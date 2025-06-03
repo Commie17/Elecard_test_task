@@ -12,9 +12,8 @@
 class OverlayProcessor
 {
 public:
-    static void overlayImageOnVideo(const std::string& imagePath, const std::string& videoPath);
-    static void overlay_in_thread(MatrixYUV420 imageYuv, const Yuv420File& rawVideo, const Yuv420File& resultVideo, size_t startFrameIndex, size_t endFrameIndex);
+    static void overlayImageOnVideo(const std::string& imagePath, const std::string& videoPath, size_t width, size_t height);
 private:
     static size_t get_video_file_size(const std::string& videoPath);
-    
+    static void overlay_in_thread(MatrixYUV420 imageYuv, const Yuv420File& rawVideo, const Yuv420File& resultVideo, size_t startFrameIndex, size_t endFrameIndex);
 };

@@ -13,6 +13,7 @@ set(SOURCES
     imageBmp.cpp
     videoYuv420Reader.cpp
     videoYuv420Writer.cpp
+    validator.cpp
 )
 
 # Заголовочные файлы
@@ -23,6 +24,7 @@ set(HEADERS
     imageBmp.h
     videoYuv420Reader.h
     videoYuv420Writer.h
+    validator.h
 )
 
 # Создание исполняемого файла
